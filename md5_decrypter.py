@@ -1,13 +1,6 @@
 import hashlib
-
-
-def capture_input():
-    input_string = input("Enter a string to decrypt: ")
-    if not input_string.isalpha():
-        print(f"\"{input_string}\" is not a valid string. Only uppercase and lowercase letters are allowed.")
-        capture_input()
-    else:
-        return input_string
+import itertools
+import string
 
 
 def calculate_md5(text):
@@ -17,13 +10,26 @@ def calculate_md5(text):
     return md5_hash.hexdigest()
 
 
+def decrypt(input_hash, input_length, input_case):
+    iterate_through_alphabet(input_case)
+    return True
+
+
+def iterate_through_alphabet(case):
+    if case == "lower":
+        for char in itertools.chain(string.ascii_lowercase):
+            print(char)
+    else:
+        for char in itertools.chain(string.ascii_lowercase, string.ascii_uppercase):
+            print(char)
+
+
 def main():
-    text = "aavc"
-    text = capture_input()
-    md5_hash = calculate_md5(str(text))
-    print(md5_hash)
+    input_hash = input("Enter an MD5 hash to decrypt: ")
+    input_length = input("Enter a string length to decrypt: ")
+    input_case = input("Is the string upper (\"lower\") or upper- and lowercase (\"both\")? ")
+    decrypt(input_hash, input_length, input_case)
 
 
 if __name__ == "__main__":
     main()
-    print("test")
