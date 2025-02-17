@@ -2,6 +2,8 @@ import hashlib
 import itertools
 import string
 import asyncio
+import time
+
 
 class AsyncMD5Cracker:
     def __init__(self, target_hash: str, length: int, case: str):
@@ -36,8 +38,12 @@ async def main():
     input_length = int(input("Enter the string length to decrypt: ").strip())
     input_case = input("Is the string lowercase (\"lower\") or both cases (\"both\")? ").strip()
 
+    start = time.time()
     cracker = AsyncMD5Cracker(input_hash, input_length, input_case)
     result = await cracker.crack()
+    end = time.time()
+
+    print(f"Time taken to run the code was {end - start} seconds")
 
     if result:
         print(f"Decryption successful: {result}")
