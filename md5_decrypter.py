@@ -2,6 +2,19 @@ import hashlib
 import itertools
 import string
 import time
+import multiprocessing
+
+
+def calculate_md5(text: str):
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
+
+def worker(target_hash, characters, length, queue):
+    for candidate in itertools.product(characters, repeat=length):
+        candidate_str = "".join(candidate)
+        if calculate_md5(candidate_str) == target_hash:
+            queue.put(candidate_str)
+            return
 
 
 class MD5Cracker:
@@ -11,19 +24,26 @@ class MD5Cracker:
         self.characters = self.get_character_set(case)
 
     def get_character_set(self, case: str):
-        if case == "lower":
-            return string.ascii_lowercase
-        return string.ascii_letters  # Both lowercase and uppercase
-
-    def calculate_md5(self, text: str):
-        return hashlib.md5(text.encode("utf-8")).hexdigest()
+        return string.ascii_lowercase if case == "lower" else string.ascii_letters
 
     def crack(self):
-        for candidate in itertools.product(self.characters, repeat=self.length):
-            candidate_str = "".join(candidate)
-            if self.calculate_md5(candidate_str) == self.target_hash:
-                print(f"Match found! {candidate_str} -> {self.target_hash}")
-                return candidate_str
+        num_workers = multiprocessing.cpu_count()
+        queue = multiprocessing.Queue()
+        processes = []
+
+        for _ in range(num_workers):
+            p = multiprocessing.Process(target=worker, args=(self.target_hash, self.characters, self.length, queue))
+            processes.append(p)
+            p.start()
+
+        for p in processes:
+            p.join()
+
+        if not queue.empty():
+            match = queue.get()
+            print(f"Match found! {match} -> {self.target_hash}")
+            return match
+
         print("No match found.")
         return None
 
