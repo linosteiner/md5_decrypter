@@ -1,8 +1,11 @@
 import hashlib
 import itertools
 import multiprocessing
+import re
 import string
 import time
+
+MAX_ALLOWED_STRING_LENGTH = 8
 
 
 def calculate_md5(text: str):
@@ -52,10 +55,36 @@ class MD5Cracker:
         return None
 
 
+def is_valid_md5(hash_str):
+    """ Validate if the input is a valid 32-character hexadecimal MD5 hash. """
+    return bool(re.fullmatch(r"[a-fA-F0-9]{32}", hash_str))
+
+
 def main():
-    input_hash = input("Enter an MD5 hash to decrypt: ").strip()
-    input_length = int(input("Enter the string length to decrypt: ").strip())
-    input_case = input("Is the string lowercase (\"lower\") or both cases (\"both\")? ").strip()
+    while True:
+        input_hash = input("Enter an MD5 hash to decrypt: ").strip()
+        if is_valid_md5(input_hash):
+            break
+        else:
+            print("Error: Invalid MD5 hash. It must be a 32-character hexadecimal string.")
+
+    while True:
+        try:
+            input_length = int(
+                input(f"Enter the string length to decrypt (maximum {MAX_ALLOWED_STRING_LENGTH} characters): ").strip())
+            if 1 <= input_length <= MAX_ALLOWED_STRING_LENGTH:
+                break
+            else:
+                print(f"Error: Length must be between 1 and {MAX_ALLOWED_STRING_LENGTH}.")
+        except ValueError:
+            print("Error: Please enter a valid number.")
+
+    while True:
+        input_case = input("Is the string lowercase (\"lower\") or both cases (\"both\")? ").strip()
+        if input_case in {"lower", "both"}:
+            break
+        else:
+            print('Error: Input must be either "lower" or "both".')
 
     start = time.time()
     cracker = MD5Cracker(input_hash, input_length, input_case)
@@ -63,7 +92,7 @@ def main():
     result = cracker.crack()
     end = time.time()
 
-    print(f"Time taken to run the code was {end - start:.2f} seconds")
+    print(f"Time taken: {end - start:.2f} seconds")
 
     if result:
         print(f"Decryption successful: {result}")
