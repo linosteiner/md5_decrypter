@@ -1,102 +1,81 @@
 import hashlib
 import itertools
-import multiprocessing
 import re
 import string
 import time
 
-MAX_ALLOWED_STRING_LENGTH = 8
+
+def get_character_set(case):
+    """
+    Return a string of characters based on the given case.
+    :param case: "lower" or "both"
+    """
+    if case == "lower":
+        return string.ascii_lowercase
+    return string.ascii_letters
 
 
-def calculate_md5(text: str):
+def calculate_md5(text):
+    """
+    Return the MD5 hash of the input text.
+    :param text: String to hash
+    :return: A 32-character hexadecimal MD5 hash
+    """
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 
-def worker(target_hash, characters, length, queue):
-    for candidate in itertools.product(characters, repeat=length):
-        candidate_str = "".join(candidate)
-        if calculate_md5(candidate_str) == target_hash:
-            queue.put(candidate_str)
-            return
-
-
-def get_character_set(case: str):
-    return string.ascii_lowercase if case == "lower" else string.ascii_letters
-
-
 class MD5Cracker:
-    def __init__(self, target_hash: str, length: int, case: str):
+    def __init__(self, target_hash, length, case):
         self.target_hash = target_hash
         self.length = length
         self.characters = get_character_set(case)
         self.total_attempts = len(self.characters) ** self.length
 
     def crack(self):
-        num_workers = multiprocessing.cpu_count()
-        queue = multiprocessing.Queue()
-        processes = []
-
+        """
+        Brute-force the MD5 hash by iterating over all possible combinations.
+        :return: The matching string if found, otherwise None
+        """
         print(f"Total possible attempts: {self.total_attempts}")
 
-        for _ in range(num_workers):
-            p = multiprocessing.Process(target=worker, args=(self.target_hash, self.characters, self.length, queue))
-            processes.append(p)
-            p.start()
-
-        for p in processes:
-            p.join()
-
-        if not queue.empty():
-            match = queue.get()
-            print(f"Match found! {match} -> {self.target_hash}")
-            return match
-
-        print("No match found after exhaustive search.")
+        for candidate in itertools.product(self.characters, repeat=self.length):
+            candidate_str = "".join(candidate)
+            if calculate_md5(candidate_str) == self.target_hash:
+                print(f"Match found! {candidate_str} -> {self.target_hash}")
+                return candidate_str
+        print("No match found.")
         return None
-
-
-def is_valid_md5(hash_str):
-    """ Validate if the input is a valid 32-character hexadecimal MD5 hash. """
-    return bool(re.fullmatch(r"[a-fA-F0-9]{32}", hash_str))
 
 
 def main():
     while True:
-        input_hash = input("Enter an MD5 hash to decrypt: ").strip()
-        if is_valid_md5(input_hash):
+        input_hash = input("Enter an MD5 hash to decrypt (32 hex chars): ").strip()
+        if re.fullmatch(r"[a-fA-F0-9]{32}", input_hash):
             break
-        else:
-            print("Error: Invalid MD5 hash. It must be a 32-character hexadecimal string.")
+        print("Invalid MD5 hash. It must be exactly 32 hexadecimal characters.")
 
     while True:
-        try:
-            input_length = int(
-                input(f"Enter the string length to decrypt (maximum {MAX_ALLOWED_STRING_LENGTH} characters): ").strip())
-            if 1 <= input_length <= MAX_ALLOWED_STRING_LENGTH:
+        length_str = input("Enter the string length to decrypt (positive integer): ").strip()
+        if length_str.isdigit():
+            input_length = int(length_str)
+            if input_length > 0:
                 break
-            else:
-                print(f"Error: Length must be between 1 and {MAX_ALLOWED_STRING_LENGTH}.")
-        except ValueError:
-            print("Error: Please enter a valid number.")
+        print("Invalid length. Please enter a positive integer.")
 
     while True:
-        input_case = input("Is the string lowercase (\"lower\") or both cases (\"both\")? ").strip()
-        if input_case in {"lower", "both"}:
+        input_case = input('Is the string lowercase ("lower") or both cases ("both")? ').strip().lower()
+        if input_case in ("lower", "both"):
             break
-        else:
-            print('Error: Input must be either "lower" or "both".')
+        print('Invalid input. Please enter "lower" or "both".')
 
     start = time.time()
     cracker = MD5Cracker(input_hash, input_length, input_case)
-
     result = cracker.crack()
     end = time.time()
 
-    print(f"Time taken: {end - start:.2f} seconds")
+    print(f"Time taken to run the code: {end - start:.2f} seconds")
 
-    if result:
-        print(f"Decryption successful: {result}")
-    else:
+    if not result:
         print("Decryption failed.")
 
 
