@@ -26,11 +26,14 @@ class MD5Cracker:
         self.target_hash = target_hash
         self.length = length
         self.characters = get_character_set(case)
+        self.total_attempts = len(self.characters) ** self.length
 
     def crack(self):
         num_workers = multiprocessing.cpu_count()
         queue = multiprocessing.Queue()
         processes = []
+
+        print(f"Total possible attempts: {self.total_attempts}")
 
         for _ in range(num_workers):
             p = multiprocessing.Process(target=worker, args=(self.target_hash, self.characters, self.length, queue))
@@ -45,7 +48,7 @@ class MD5Cracker:
             print(f"Match found! {match} -> {self.target_hash}")
             return match
 
-        print("No match found.")
+        print("No match found after exhaustive search.")
         return None
 
 
@@ -56,10 +59,11 @@ def main():
 
     start = time.time()
     cracker = MD5Cracker(input_hash, input_length, input_case)
+
     result = cracker.crack()
     end = time.time()
 
-    print(f"Time taken to run the code was {end - start} seconds")
+    print(f"Time taken to run the code was {end - start:.2f} seconds")
 
     if result:
         print(f"Decryption successful: {result}")
