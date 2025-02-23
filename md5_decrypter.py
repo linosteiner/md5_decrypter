@@ -1,8 +1,8 @@
 import hashlib
 import itertools
+import multiprocessing
 import string
 import time
-import multiprocessing
 
 
 def calculate_md5(text: str):
@@ -17,14 +17,15 @@ def worker(target_hash, characters, length, queue):
             return
 
 
+def get_character_set(case: str):
+    return string.ascii_lowercase if case == "lower" else string.ascii_letters
+
+
 class MD5Cracker:
     def __init__(self, target_hash: str, length: int, case: str):
         self.target_hash = target_hash
         self.length = length
-        self.characters = self.get_character_set(case)
-
-    def get_character_set(self, case: str):
-        return string.ascii_lowercase if case == "lower" else string.ascii_letters
+        self.characters = get_character_set(case)
 
     def crack(self):
         num_workers = multiprocessing.cpu_count()
@@ -51,7 +52,7 @@ class MD5Cracker:
 def main():
     input_hash = input("Enter an MD5 hash to decrypt: ").strip()
     input_length = int(input("Enter the string length to decrypt: ").strip())
-    input_case = input('Is the string lowercase ("lower") or both cases ("both")? ').strip()
+    input_case = input("Is the string lowercase (\"lower\") or both cases (\"both\")? ").strip()
 
     start = time.time()
     cracker = MD5Cracker(input_hash, input_length, input_case)
