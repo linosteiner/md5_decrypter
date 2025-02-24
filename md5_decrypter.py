@@ -38,7 +38,9 @@ class MD5Cracker:
         """
         print(f"Total possible attempts: {self.total_attempts}")
 
+        # iterate over all possible combinations of strings for the given length
         for candidate in itertools.product(self.characters, repeat=self.length):
+            # the variable candidate is a tuple, this join method creates a single string to compare them with the hash
             candidate_str = "".join(candidate)
             if calculate_md5(candidate_str) == self.target_hash:
                 print(f"Match found! {candidate_str} -> {self.target_hash}")
@@ -47,27 +49,39 @@ class MD5Cracker:
         return None
 
 
-def main():
+def get_input_hash():
     while True:
         input_hash = input("Enter an MD5 hash to decrypt (32 hex chars): ").strip()
         if re.fullmatch(r"[a-fA-F0-9]{32}", input_hash):
-            break
+            return input_hash
         print("Invalid MD5 hash. It must be exactly 32 hexadecimal characters.")
 
+
+def get_length_str():
     while True:
         length_str = input("Enter the string length to decrypt (positive integer): ").strip()
         if length_str.isdigit():
             input_length = int(length_str)
             if input_length > 0:
-                break
+                return input_length
         print("Invalid length. Please enter a positive integer.")
 
+
+def get_input_case():
     while True:
         input_case = input('Is the string lowercase ("lower") or both cases ("both")? ').strip().lower()
         if input_case in ("lower", "both"):
-            break
+            return input_case
         print('Invalid input. Please enter "lower" or "both".')
 
+
+def main():
+    # get the inputs for hash, length and case
+    input_hash = get_input_hash()
+    input_length = get_length_str()
+    input_case = get_input_case()
+
+    # brute force a result with the MD5Cracker class
     start = time.time()
     cracker = MD5Cracker(input_hash, input_length, input_case)
     result = cracker.crack()
