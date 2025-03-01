@@ -26,6 +26,30 @@ def calculate_md5(text):
 
 class MD5Cracker:
     def __init__(self, target_hash, length, case):
+        """
+        Initializes an MD5Cracker instance for brute-force decryption of an MD5 hash.
+
+        This constructor sets up the necessary parameters for the brute-force attack by
+        defining the target hash, the length of the string to search for, and the character set
+        to use. The total number of possible attempts is precomputed to provide an estimate
+        of the computational effort required.
+
+        Args:
+            target_hash (str): The MD5 hash to be brute-forced.
+            length (int): The length of the target string (number of characters).
+            case (str): The character set specification:
+                        - "lower": Uses lowercase English letters (a-z).
+                        - "both": Uses both uppercase and lowercase letters (A-Z, a-z).
+
+        Attributes:
+            target_hash (str): Stores the target MD5 hash to be matched.
+            length (int): Defines the length of the candidate strings to be generated.
+            characters (str): The set of characters allowed in the candidate strings,
+                              determined by the `case` parameter.
+            total_attempts (int): The total number of possible candidate strings, calculated
+                                  as `len(self.characters) ** self.length`, which provides an
+                                  estimate of the brute-force complexity.
+        """
         self.target_hash = target_hash
         self.length = length
         self.characters = get_character_set(case)
@@ -38,7 +62,9 @@ class MD5Cracker:
         """
         print(f"Total possible attempts: {self.total_attempts}")
 
+        # Iterate over all possible combinations of characters of the given length
         for candidate in itertools.product(self.characters, repeat=self.length):
+            # Convert the tuple of characters into a string
             candidate_str = "".join(candidate)
             if calculate_md5(candidate_str) == self.target_hash:
                 print(f"Match found! {candidate_str} -> {self.target_hash}")
