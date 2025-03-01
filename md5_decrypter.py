@@ -100,12 +100,12 @@ def get_input_case():
 
 
 def main():
-    # get the inputs for hash, length and case
+    # Get the inputs for hash, length and case
     input_hash = get_input_hash()
     input_length = get_length_str()
     input_case = get_input_case()
 
-    # brute force a result with the MD5Cracker class
+    # Brute force a result with the MD5Cracker class
     start = time.time()
     cracker = MD5Cracker(input_hash, input_length, input_case)
     result = cracker.crack()
