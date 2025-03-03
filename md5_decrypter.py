@@ -86,7 +86,7 @@ def get_length_str():
         length_str = input("Enter the string length to decrypt (positive integer): ").strip()
         if length_str.isdigit():
             input_length = int(length_str)
-            if input_length > 0:
+            if 0 < input_length <= 8:
                 return input_length
         print("Invalid length. Please enter a positive integer.")
 
