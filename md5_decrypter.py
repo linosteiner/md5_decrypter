@@ -29,11 +29,6 @@ class MD5Cracker:
         """
         Initializes an MD5Cracker instance for brute-force decryption of an MD5 hash.
 
-        This constructor sets up the necessary parameters for the brute-force attack by
-        defining the target hash, the length of the string to search for, and the character set
-        to use. The total number of possible attempts is precomputed to provide an estimate
-        of the computational effort required.
-
         Args:
             target_hash (str): The MD5 hash to be brute-forced.
             length (int): The length of the target string (number of characters).
