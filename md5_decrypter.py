@@ -83,7 +83,7 @@ def get_length_str():
             input_length = int(length_str)
             if 0 < input_length <= 8:
                 return input_length
-        print("Invalid length. Please enter a positive integer.")
+        print("Invalid length. Please enter a positive integer smaller than 9.")
 
 
 def get_input_case():
